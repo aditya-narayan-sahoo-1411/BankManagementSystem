@@ -1,3 +1,4 @@
+
 import json
 import random
 import string
@@ -14,7 +15,7 @@ class Bank:
                 data = json.load(fs)
         else:
             data = []
-    except Exception:
+    except:
         data = []
 
     @classmethod
@@ -28,14 +29,24 @@ class Bank:
         num = random.choices(string.digits, k=3)
         spchar = random.choices("!@#$%^&*", k=1)
 
-        id = alpha + num + spchar
-        random.shuffle(id)
+        acc = alpha + num + spchar
+        random.shuffle(acc)
 
-        return "".join(id)
-
-    # ---------------- CREATE ACCOUNT ----------------
+        return "".join(acc)
 
     def Createaccount(self, name, age, email, pin):
+
+        if age < 18:
+            return {
+                "success": False,
+                "message": "Age must be at least 18"
+            }
+
+        if len(str(pin)) != 4:
+            return {
+                "success": False,
+                "message": "PIN must contain 4 digits"
+            }
 
         info = {
             "name": name,
@@ -46,12 +57,6 @@ class Bank:
             "balance": 0
         }
 
-        if info["age"] < 18 or len(str(info["pin"])) != 4:
-            return {
-                "success": False,
-                "message": "Sorry, you cannot create your account"
-            }
-
         Bank.data.append(info)
         Bank.__update()
 
@@ -61,8 +66,6 @@ class Bank:
             "accountNo.": info["accountNo."]
         }
 
-    # ---------------- DEPOSIT MONEY ----------------
-
     def depositmoney(self, accnumber, pin, amount):
 
         userdata = [
@@ -71,16 +74,7 @@ class Bank:
         ]
 
         if not userdata:
-            return {
-                "success": False,
-                "message": "Sorry, no data found"
-            }
-
-        if amount > 10000 or amount < 0:
-            return {
-                "success": False,
-                "message": "Deposit amount should be between 0 and 10000"
-            }
+            return {"success": False, "message": "No user found"}
 
         userdata[0]["balance"] += amount
 
@@ -88,11 +82,9 @@ class Bank:
 
         return {
             "success": True,
-            "message": "Amount deposited successfully",
+            "message": "Money deposited successfully",
             "balance": userdata[0]["balance"]
         }
-
-    # ---------------- WITHDRAW MONEY ----------------
 
     def withdrawmoney(self, accnumber, pin, amount):
 
@@ -102,15 +94,12 @@ class Bank:
         ]
 
         if not userdata:
-            return {
-                "success": False,
-                "message": "Sorry, no data found"
-            }
+            return {"success": False, "message": "No user found"}
 
         if userdata[0]["balance"] < amount:
             return {
                 "success": False,
-                "message": "Sorry, you don't have that much money"
+                "message": "Insufficient balance"
             }
 
         userdata[0]["balance"] -= amount
@@ -119,11 +108,9 @@ class Bank:
 
         return {
             "success": True,
-            "message": "Amount withdrawn successfully",
+            "message": "Money withdrawn successfully",
             "balance": userdata[0]["balance"]
         }
-
-    # ---------------- SHOW DETAILS ----------------
 
     def showdetails(self, accnumber, pin):
 
@@ -135,15 +122,13 @@ class Bank:
         if not userdata:
             return {
                 "success": False,
-                "message": "No user found"
+                "message": "User not found"
             }
 
         return {
             "success": True,
             "data": userdata[0]
         }
-
-    # ---------------- UPDATE DETAILS ----------------
 
     def updatedetails(self, accnumber, pin, name="", email="", newpin=""):
 
@@ -153,24 +138,15 @@ class Bank:
         ]
 
         if not userdata:
-            return {
-                "success": False,
-                "message": "No such user found"
-            }
+            return {"success": False, "message": "User not found"}
 
-        if name != "":
+        if name:
             userdata[0]["name"] = name
 
-        if email != "":
+        if email:
             userdata[0]["email"] = email
 
-        if newpin != "":
-            if len(str(newpin)) != 4:
-                return {
-                    "success": False,
-                    "message": "PIN must be 4 digits"
-                }
-
+        if newpin:
             userdata[0]["pin"] = int(newpin)
 
         Bank.__update()
@@ -179,8 +155,6 @@ class Bank:
             "success": True,
             "message": "Details updated successfully"
         }
-
-    # ---------------- DELETE ACCOUNT ----------------
 
     def Delete(self, accnumber, pin):
 
@@ -192,12 +166,10 @@ class Bank:
         if not userdata:
             return {
                 "success": False,
-                "message": "Sorry, no such data exists"
+                "message": "User not found"
             }
 
-        index = Bank.data.index(userdata[0])
-
-        Bank.data.pop(index)
+        Bank.data.remove(userdata[0])
 
         Bank.__update()
 
@@ -205,3 +177,4 @@ class Bank:
             "success": True,
             "message": "Account deleted successfully"
         }
+
