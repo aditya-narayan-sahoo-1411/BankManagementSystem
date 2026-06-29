@@ -1,5 +1,5 @@
 
-import streamlit as st
+import streamlit as st #  type: ignore[reportMissingImports]
 from bank import Bank
 
 st.set_page_config(
